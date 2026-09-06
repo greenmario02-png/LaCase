@@ -19,12 +19,14 @@ desplegada.
 
 ## Capturas de pantalla
 
-<p>
-  <img src="screenshots/01-home.png" width="230" alt="Catálogo" />
-  <img src="screenshots/02-producto.png" width="230" alt="Detalle de producto" />
-  <img src="screenshots/03-subasta.png" width="230" alt="Subasta" />
-  <img src="screenshots/04-chat.png" width="230" alt="Chat" />
-</p>
+| | | |
+|---|---|---|
+| ![Inicio](screenshots/01-home.png) | ![Producto](screenshots/02-producto.png) | ![Subasta](screenshots/03-subasta.png) |
+| **Inicio** — cotizaciones en vivo, categorías y ofertas relámpago | **Detalle de producto** — precio, vendedor y reseñas | **Subasta** — puja, reserva, historial de ofertas |
+| ![Chat](screenshots/04-chat.png) | ![Foro](screenshots/05-foro.png) | ![Perfil](screenshots/06-perfil.png) |
+| **Mensajes** — chat comprador↔vendedor en tiempo real | **Foro** — preguntas y respuestas con contexto boliviano | **Perfil** — accesos según el rol del usuario |
+| ![Catálogo](screenshots/07-productos.png) | | |
+| **Catálogo** — búsqueda y filtros multi-vendedor | | |
 
 ## Stack
 
@@ -41,31 +43,54 @@ desplegada.
 
 ## Funcionalidades principales
 
-### Compras
+La app móvil se organiza en 7 pestañas (**Inicio, Productos, Subastas, Mensajes, Carrito,
+Perfil, Foro**) más un menú de **Perfil** que da acceso al resto de las pantallas según el rol
+del usuario logueado.
+
+### Inicio
+- Cotizaciones de moneda en vivo (USD, EUR, JPY, USDT → Bs) con calculadora integrada
+- Categorías destacadas y **ofertas relámpago** con descuento y cuenta regresiva
+
+### Productos (catálogo)
 - **Catálogo multi-vendedor**: productos de todas las tiendas con búsqueda global, filtros
   avanzados (categoría, departamento, tipo de entrega, permuta, marca, precio) e infinite scroll
-- **Carrito agrupado por tienda** con merge de carrito guest tras login
-- **Checkout atómico** con envío calculado por código postal y pago por **QR**
+- Detalle de producto con especificaciones, vendedor, reseñas y control de cantidad
 - **Arma tu PC**: configurador de 8 slots con compatibilidad y calculadora
 
-### Vendedores
-- Onboarding con aprobación de admin (país, departamento, categoría de tienda, celular)
-- Dashboard con gráficos de ventas, productos CRUD con **atributos dinámicos** (EAV),
-  gestión de pedidos y verificación de comprobantes de pago
-- **Comisiones de plataforma** configurable (%, mínimo, fijo, sobre envío) con neto por orden
+### Carrito y pedidos
+- **Carrito agrupado por tienda** con merge de carrito guest tras login
+- **Checkout atómico** con envío calculado por código postal y pago por **QR**
+- Historial de pedidos (`Mis pedidos`) con detalle y seguimiento por orden
+- **Mis favoritos** (wishlist) y **Mis direcciones** guardadas
 
 ### Subastas (estilo eBay)
 - **Proxy bidding** (la oferta es un máximo), **precio de reserva**, **Buy It Now**,
   **anti-sniping** (extiende el tiempo), incremento dinámico por rango, watchlist
 - La base de datos de demo incluye subastas activas con varias semanas de duración,
-  algunas ya con ofertas.
+  algunas ya con ofertas
 
-### Comunicación
+### Mensajes (chat)
 - **Chat comprador↔vendedor** en tiempo real (Socket.IO) con badge de no leídos
 - La cuenta de comprador de prueba ya tiene una conversación iniciada con la de vendedor
-- **Notificaciones por rol** con campana global, historial persistente y navegación directa
+- **Notificaciones** por rol con campana global, historial persistente y navegación directa
 
-### Administración (10 módulos)
+### Perfil
+- **Editar perfil**, ver monedas del juego (gamer coins) y estado de verificación
+- **Invitá amigos y ganá monedas** (programa de referidos)
+- Si el usuario es **vendedor**: `Mi tienda` (dashboard con gráficos de ventas), `Mis productos`
+  (CRUD con **atributos dinámicos** EAV), `Carga masiva de productos`, `Equipo de tienda`
+  (roles OWNER/ADMIN/EMPLOYEE), `Mis cupones`, `Mis promociones`, `Mis pagos` (comisión de
+  plataforma configurable — %, mínimo, fijo, o sobre envío — con neto por orden) y `Editar tienda`
+- Si el usuario es **administrador**: `Panel admin` (dashboard con gráficos), `Vendedores`,
+  `Verificación de tiendas` y `Moderación del foro`
+
+### Foro comunitario (LaCASE)
+- Preguntas y respuestas por ciudad y categoría (precios, stock, empleos, alquileres,
+  anticréticos, trámites, transporte, etc.), con contenido de ejemplo real de Bolivia
+- Sistema de **karma** y rangos (Novato → Leyenda), votos, respuestas aceptadas y moderación
+- Geolocalización por ciudad/departamento con subforos configurables
+
+### Administración web (10 módulos, en el frontend)
 Dashboard con gráficos Recharts · moderación de productos · gestión de vendedores y usuarios ·
 categorías con editor de imágenes · banners con recorte · promociones con selector tienda→producto ·
 reportes económicos · contenido del sitio · moneda (Bs base, USD con tasa actualizable)

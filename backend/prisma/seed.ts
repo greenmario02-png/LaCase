@@ -17,6 +17,160 @@ function lacaseEmail(firstName: string, lastName: string): string {
   return faker.internet.email({ firstName, lastName, provider: 'lacase.bo' }).toLowerCase();
 }
 
+const STORE_TAGLINES = [
+  'Envíos a todo el departamento y atención por WhatsApp.',
+  'Más de 5 años vendiendo en el mercado local.',
+  'Precios de fábrica, sin intermediarios.',
+  'Recibimos tu producto usado como parte de pago.',
+  'Garantía escrita en todos nuestros productos.',
+];
+
+function storeTagline(): string {
+  return faker.helpers.arrayElement(STORE_TAGLINES);
+}
+
+const DESC_INTROS: Record<string, string[]> = {
+  NEW: ['Producto nuevo, sellado de fábrica.', 'A estrenar, con caja y accesorios originales.'],
+  REFURBISHED: ['Reacondicionado y revisado, funcionando al 100%.', 'Reacondicionado con garantía de la tienda.'],
+  USED: ['Usado, en buen estado y funcionando correctamente.', 'De segunda mano, cuidado y con poco uso.'],
+};
+
+const DESC_CLOSERS = [
+  'Entrega en el punto de encuentro o envío a domicilio dentro de la ciudad.',
+  'Consultanos por WhatsApp para coordinar la entrega.',
+  'Aceptamos pago por QR o transferencia bancaria.',
+  'Stock limitado, hacé tu pedido antes de que se agote.',
+  'Ideal para uso diario o como regalo.',
+];
+
+function productDescription(name: string, categoryName: string, condition: 'NEW' | 'REFURBISHED' | 'USED'): string {
+  const intro = faker.helpers.arrayElement(DESC_INTROS[condition]);
+  const closer = faker.helpers.arrayElement(DESC_CLOSERS);
+  return `${name} — categoría ${categoryName}. ${intro} ${closer}`;
+}
+
+const REVIEW_COMMENTS = [
+  'Llegó rápido y en buen estado, tal como se describía.',
+  'Buena atención del vendedor, todo bien con la compra.',
+  'El producto es tal cual la foto, muy conforme.',
+  'Un poco demorado el envío pero el producto vale la pena.',
+  'Excelente relación precio-calidad, lo recomiendo.',
+];
+
+function reviewComment(): string {
+  return faker.helpers.arrayElement(REVIEW_COMMENTS);
+}
+
+const ORDER_NOTES = [
+  'Entregar después de las 18:00 por favor.',
+  'Dejar con el portero si no estoy.',
+  'Llamar antes de llegar al domicilio.',
+  'Es para regalo, si se puede envolver mejor.',
+];
+
+function orderNote(): string {
+  return faker.helpers.arrayElement(ORDER_NOTES);
+}
+
+// Palabra clave en inglés por categoría, para pedir fotos reales y relevantes a LoremFlickr
+// (en vez de fotos aleatorias sin relación con el producto).
+const CATEGORY_KEYWORDS: Record<string, string> = {
+  Hardware: 'computer-hardware',
+  Procesadores: 'cpu',
+  'Placas de Video': 'graphics-card',
+  Motherboards: 'motherboard',
+  'Memorias RAM': 'ram-memory',
+  Almacenamiento: 'ssd',
+  Gabinetes: 'pc-case',
+  'Fuentes de Poder': 'power-supply',
+  Refrigeración: 'pc-cooling',
+  Periféricos: 'computer-peripherals',
+  Teclados: 'keyboard',
+  Mouse: 'computer-mouse',
+  Auriculares: 'headphones',
+  Monitores: 'monitor',
+  Micrófonos: 'microphone',
+  Ropa: 'clothing',
+  Remeras: 'tshirt',
+  Pantalones: 'jeans',
+  Camperas: 'jacket',
+  Calzado: 'shoes',
+  Accesorios: 'fashion-accessories',
+  Celulares: 'smartphone',
+  Smartphones: 'smartphone',
+  Fundas: 'phone-case',
+  Cargadores: 'phone-charger',
+  Smartwatches: 'smartwatch',
+  Cámaras: 'camera',
+  Electrodomésticos: 'home-appliance',
+  Heladeras: 'refrigerator',
+  Lavarropas: 'washing-machine',
+  Cocinas: 'kitchen-stove',
+  Microondas: 'microwave',
+  Pequeños: 'small-appliances',
+  Antigüedades: 'antiques',
+  Relojes: 'antique-clock',
+  'Discos de Vinilo': 'vinyl-record',
+  Cervezas: 'beer',
+  Vinos: 'wine',
+  Licores: 'whiskey',
+  'Bebidas sin alcohol': 'soda',
+  'Juegos de mesa': 'board-game',
+  Muñecos: 'doll',
+  Construcción: 'lego',
+  Peluches: 'teddy-bear',
+  Fútbol: 'soccer-ball',
+  Bicicletas: 'bicycle',
+  Gimnasio: 'dumbbell',
+  Camping: 'camping-tent',
+  'Muebles para Hogar': 'sofa',
+  Muebles: 'furniture',
+  Decoración: 'home-decor',
+  Iluminación: 'lamp',
+  Blanquería: 'bedsheets',
+  Cosméticos: 'makeup',
+  'Cuidado personal': 'hair-clipper',
+  Perfumes: 'perfume',
+  Alimento: 'dog-food',
+  'Accesorios para mascotas': 'pet-collar',
+  'Juguetes para mascotas': 'cat-toy',
+  Guitarras: 'guitar',
+  'Teclados musicales': 'piano-keyboard',
+  Audio: 'speaker',
+  'Instrumentos de viento': 'trumpet',
+  Consolas: 'game-console',
+  Juegos: 'video-game',
+  'Accesorios gaming': 'gaming-headset',
+  Libros: 'books',
+  Novelas: 'books',
+  Educativos: 'textbook',
+  'Comics y Mangas': 'comic-book',
+  Papelería: 'notebook-stationery',
+  Artesanías: 'handicraft',
+  Cerámica: 'pottery',
+  Tejidos: 'weaving',
+  Madera: 'woodcraft',
+  'Joyería artesanal': 'handmade-jewelry',
+  Manuales: 'vintage-book',
+  Eléctricas: 'power-drill',
+  Jardinería: 'gardening-tools',
+  Seguridad: 'security-camera',
+};
+
+let flickrSeed = 100;
+
+/** Foto real (LoremFlickr) para una palabra clave dada, en vez de una imagen aleatoria sin relación. */
+function flickrImage(keyword: string, width = 800, height = width): string {
+  flickrSeed += 1;
+  return `https://loremflickr.com/${width}/${height}/${keyword}?lock=${flickrSeed}`;
+}
+
+/** Foto real (LoremFlickr) relacionada a la categoría del producto. */
+function categoryImage(categoryName: string, width = 800, height = width): string {
+  const keyword = CATEGORY_KEYWORDS[categoryName] ?? 'store';
+  return flickrImage(keyword, width, height);
+}
+
 const CATEGORY_TREE = [
   {
     name: 'Hardware',
@@ -827,13 +981,13 @@ async function main() {
       role: Role.SELLER,
       storeName: 'TecnoCase Cochabamba',
       storeDescription: 'Tienda de tecnología y electrodomésticos en Cochabamba.',
-      storeLogo: faker.image.url({ width: 200, height: 200 }),
-      storeBanner: faker.image.url({ width: 1200, height: 300 }),
+      storeLogo: flickrImage('electronics-store', 200),
+      storeBanner: flickrImage('electronics-store', 1200, 300),
       locationCity: 'Cochabamba',
       locationState: 'Cochabamba',
       locationPostalCode: '3000',
       country: 'BO',
-      paymentQrUrl: faker.image.url({ width: 300, height: 300 }),
+      paymentQrUrl: flickrImage('qr-code', 300),
       rating: 4.7,
       totalSales: 128,
       isVerified: true,
@@ -856,14 +1010,14 @@ async function main() {
         phone: boliviaPhone(),
         role: Role.SELLER,
         storeName: faker.company.name(),
-        storeDescription: faker.lorem.sentence(8),
-        storeLogo: faker.image.url({ width: 200, height: 200 }),
-        storeBanner: faker.image.url({ width: 1200, height: 300 }),
+        storeDescription: storeTagline(),
+        storeLogo: flickrImage('storefront', 200),
+        storeBanner: flickrImage('storefront', 1200, 300),
         locationCity: loc.city,
         locationState: loc.state,
         locationPostalCode: loc.cp,
         country: 'BO',
-        paymentQrUrl: faker.image.url({ width: 300, height: 300 }),
+        paymentQrUrl: flickrImage('qr-code', 300),
         rating: faker.number.float({ min: 3, max: 5, fractionDigits: 1 }),
         totalSales: faker.number.int({ min: 0, max: 200 }),
         isVerified: faker.datatype.boolean(0.7),
@@ -944,7 +1098,7 @@ async function main() {
         name: parent.name,
         slug: parent.slug,
         icon: (parent as any).icon ?? null,
-        imageUrl: faker.image.url({ width: 800, height: 600 }),
+        imageUrl: categoryImage(parent.name, 800, 600),
         order: 0,
       },
     });
@@ -1013,7 +1167,7 @@ async function main() {
           categoryId: categoryMap[categoryName],
           name: tpl.name,
           slug,
-          description: faker.lorem.paragraph(3),
+          description: productDescription(tpl.name, categoryName, condition),
           condition,
           conditionScore,
           price,
@@ -1034,7 +1188,7 @@ async function main() {
           saleCount: faker.number.int({ min: 0, max: 300 }),
           images: {
             create: Array.from({ length: faker.number.int({ min: 2, max: 5 }) }).map((_, imgIdx) => ({
-              url: faker.image.url({ width: 800, height: 800 }),
+              url: categoryImage(categoryName),
               order: imgIdx,
               isPrimary: imgIdx === 0,
             })),
@@ -1130,9 +1284,9 @@ async function main() {
     await prisma.banner.create({
       data: {
         title: bannerDefs[i].title,
-        imageDesktop: faker.image.url({ width: 1920, height: 400 }),
-        imageTablet: faker.image.url({ width: 1024, height: 400 }),
-        imageMobile: faker.image.url({ width: 600, height: 400 }),
+        imageDesktop: flickrImage('sale-shopping', 1920, 400),
+        imageTablet: flickrImage('sale-shopping', 1024, 400),
+        imageMobile: flickrImage('sale-shopping', 600, 400),
         link: bannerDefs[i].link,
         backgroundColor: bannerDefs[i].bg,
         order: i,
@@ -1171,7 +1325,7 @@ async function main() {
         total: subtotal + shippingCost,
         paymentMethod: 'QR',
         paymentStatus: faker.datatype.boolean(0.7) ? 'VERIFIED' : 'PENDING',
-        notes: faker.datatype.boolean(0.3) ? faker.lorem.sentence() : null,
+        notes: faker.datatype.boolean(0.3) ? orderNote() : null,
         items: { create: items },
       },
     });
@@ -1187,7 +1341,7 @@ async function main() {
         productId,
         userId,
         rating: faker.number.int({ min: 1, max: 5 }),
-        comment: faker.datatype.boolean(0.7) ? faker.lorem.sentence(6) : null,
+        comment: faker.datatype.boolean(0.7) ? reviewComment() : null,
       },
     });
   }
@@ -1309,7 +1463,7 @@ async function main() {
   for (const productId of auctionProductIds) {
     const sellerId = productSellerMap.get(productId);
     if (!sellerId) continue;
-    const product = await prisma.product.findUnique({ where: { id: productId } });
+    const product = await prisma.product.findUnique({ where: { id: productId }, include: { images: { take: 1, orderBy: { order: 'asc' } } } });
     if (!product) continue;
 
     const startingPrice = Number(product.price) * 0.6;
@@ -1325,7 +1479,7 @@ async function main() {
         title: product.name,
         description: product.description,
         categoryId: product.categoryId,
-        imageUrl: faker.image.url({ width: 800, height: 800 }),
+        imageUrl: product.images[0]?.url ?? flickrImage('auction', 800),
         startingPrice,
         currentPrice: startingPrice,
         reservePrice: faker.datatype.boolean(0.4) ? startingPrice * 1.2 : null,

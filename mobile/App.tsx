@@ -99,13 +99,13 @@ function MainTabs() {
         tabBarStyle: { backgroundColor: colors.surface, height: 60 + insets.bottom, paddingBottom: insets.bottom },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Products" component={ProductsScreen} />
-      <Tab.Screen name="Auctions" component={AuctionsScreen} />
-      <Tab.Screen name="Chat" component={ChatScreen} />
-      <Tab.Screen name="Cart" component={CartScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
-      <Tab.Screen name="Forum" component={ForumStack} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Inicio' }} />
+      <Tab.Screen name="Products" component={ProductsScreen} options={{ tabBarLabel: 'Productos' }} />
+      <Tab.Screen name="Auctions" component={AuctionsScreen} options={{ tabBarLabel: 'Subastas' }} />
+      <Tab.Screen name="Chat" component={ChatScreen} options={{ tabBarLabel: 'Mensajes' }} />
+      <Tab.Screen name="Cart" component={CartScreen} options={{ tabBarLabel: 'Carrito' }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: 'Perfil' }} />
+      <Tab.Screen name="Forum" component={ForumStack} options={{ tabBarLabel: 'Foro' }} />
     </Tab.Navigator>
   );
 }
