@@ -12,7 +12,7 @@ desplegada.
 
 | App | URL |
 |---|---|
-| Web | https://lacase-frontend.onrender.com |
+| Web | https://frontendlacase.onrender.com |
 | API | https://lacase-backend.onrender.com/api |
 | Base de datos | PostgreSQL administrado en Supabase |
 | App móvil (Android) | [`lacase.apk`](./lacase.apk) — ver [instalación](#app-móvil-apk) |
