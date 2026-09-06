@@ -1,8 +1,21 @@
 ﻿import { PrismaClient, Role, ProductCondition, SlotType } from '@prisma/client';
-import { faker } from '@faker-js/faker';
+import { fakerES as faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
 
+import { BOLIVIANISMOS } from '../src/data/bolivianismos';
+
 const prisma = new PrismaClient();
+
+/** Número de celular boliviano: 8 dígitos, empieza con 6 o 7. */
+function boliviaPhone(): string {
+  const prefix = faker.helpers.arrayElement(['6', '7']);
+  const rest = faker.string.numeric(7);
+  return `+591 ${prefix}${rest}`;
+}
+
+function lacaseEmail(firstName: string, lastName: string): string {
+  return faker.internet.email({ firstName, lastName, provider: 'lacase.bo' }).toLowerCase();
+}
 
 const CATEGORY_TREE = [
   {
@@ -780,7 +793,7 @@ async function main() {
 
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@pctienda.com',
+      email: 'admin@lacase.bo',
       passwordHash: adminHash,
       firstName: 'Admin',
       lastName: 'Principal',
@@ -803,16 +816,44 @@ async function main() {
     { city: 'Cobija', state: 'Pando', cp: '9000' },
   ];
 
-  const sellers: number[] = [];
+  // Cuenta fija de vendedor para pruebas/demo (además de los vendedores aleatorios).
+  const demoSeller = await prisma.user.create({
+    data: {
+      email: 'vendedor@lacase.bo',
+      passwordHash,
+      firstName: 'Mateo',
+      lastName: 'Quispe',
+      phone: boliviaPhone(),
+      role: Role.SELLER,
+      storeName: 'TecnoCase Cochabamba',
+      storeDescription: 'Tienda de tecnología y electrodomésticos en Cochabamba.',
+      storeLogo: faker.image.url({ width: 200, height: 200 }),
+      storeBanner: faker.image.url({ width: 1200, height: 300 }),
+      locationCity: 'Cochabamba',
+      locationState: 'Cochabamba',
+      locationPostalCode: '3000',
+      country: 'BO',
+      paymentQrUrl: faker.image.url({ width: 300, height: 300 }),
+      rating: 4.7,
+      totalSales: 128,
+      isVerified: true,
+      isApproved: true,
+      gamerCoins: 250,
+    },
+  });
+
+  const sellers: number[] = [demoSeller.id];
   for (let i = 0; i < 12; i++) {
     const loc = cities[i % cities.length];
+    const firstName = faker.person.firstName();
+    const lastName = faker.person.lastName();
     const seller = await prisma.user.create({
       data: {
-        email: faker.internet.email(),
+        email: lacaseEmail(firstName, lastName),
         passwordHash,
-        firstName: faker.person.firstName(),
-        lastName: faker.person.lastName(),
-        phone: faker.phone.number(),
+        firstName,
+        lastName,
+        phone: boliviaPhone(),
         role: Role.SELLER,
         storeName: faker.company.name(),
         storeDescription: faker.lorem.sentence(8),
@@ -833,16 +874,45 @@ async function main() {
     sellers.push(seller.id);
   }
 
-  const customers: number[] = [];
+  // Cuenta fija de comprador para pruebas/demo (además de los compradores aleatorios).
+  const demoBuyer = await prisma.user.create({
+    data: {
+      email: 'comprador@lacase.bo',
+      passwordHash,
+      firstName: 'Valeria',
+      lastName: 'Mamani',
+      phone: boliviaPhone(),
+      role: Role.CUSTOMER,
+      locationCity: 'La Paz',
+      locationState: 'La Paz',
+      locationPostalCode: '0200',
+      gamerCoins: 120,
+    },
+  });
+  await prisma.address.create({
+    data: {
+      userId: demoBuyer.id,
+      street: faker.location.street(),
+      number: String(faker.number.int({ min: 1, max: 9999 })),
+      city: 'La Paz',
+      state: 'La Paz',
+      postalCode: '0200',
+      isDefault: true,
+    },
+  });
+
+  const customers: number[] = [demoBuyer.id];
   for (let i = 0; i < 30; i++) {
     const loc = cities[faker.number.int({ min: 0, max: cities.length - 1 })];
+    const firstName = faker.person.firstName();
+    const lastName = faker.person.lastName();
     const customer = await prisma.user.create({
       data: {
-        email: faker.internet.email(),
+        email: lacaseEmail(firstName, lastName),
         passwordHash,
-        firstName: faker.person.firstName(),
-        lastName: faker.person.lastName(),
-        phone: faker.phone.number(),
+        firstName,
+        lastName,
+        phone: boliviaPhone(),
         role: Role.CUSTOMER,
         locationCity: loc.city,
         locationState: loc.state,
@@ -922,6 +992,7 @@ async function main() {
 
   // ---------- PRODUCTS ----------
   const productIds: number[] = [];
+  const productSellerMap = new Map<number, number>();
   let index = 0;
   for (const [categoryName, templates] of Object.entries(PRODUCT_TEMPLATES)) {
     for (const tpl of templates) {
@@ -971,6 +1042,7 @@ async function main() {
         },
       });
       productIds.push(product.id);
+      productSellerMap.set(product.id, sellerId);
 
       if (tpl.attrs) {
         for (const [attrName, value] of Object.entries(tpl.attrs)) {
@@ -1230,13 +1302,107 @@ async function main() {
   ];
   await prisma.forumCity.createMany({ data: FORUM_CITIES, skipDuplicates: true });
 
+  // ---------- SUBASTAS ACTIVAS (varias semanas) ----------
+  const auctionCount = Math.min(6, productIds.length);
+  const auctionProductIds = faker.helpers.arrayElements(productIds, auctionCount);
+  let auctionsCreated = 0;
+  for (const productId of auctionProductIds) {
+    const sellerId = productSellerMap.get(productId);
+    if (!sellerId) continue;
+    const product = await prisma.product.findUnique({ where: { id: productId } });
+    if (!product) continue;
+
+    const startingPrice = Number(product.price) * 0.6;
+    const weeksOut = faker.number.int({ min: 2, max: 6 });
+    const bidderPool = customers.filter((id) => id !== sellerId);
+    const bidCount = faker.number.int({ min: 0, max: 4 });
+    const bidders = faker.helpers.arrayElements(bidderPool, Math.min(bidCount, bidderPool.length));
+
+    const auction = await prisma.auction.create({
+      data: {
+        sellerId,
+        productId,
+        title: product.name,
+        description: product.description,
+        categoryId: product.categoryId,
+        imageUrl: faker.image.url({ width: 800, height: 800 }),
+        startingPrice,
+        currentPrice: startingPrice,
+        reservePrice: faker.datatype.boolean(0.4) ? startingPrice * 1.2 : null,
+        buyNowPrice: faker.datatype.boolean(0.5) ? Number(product.price) * 1.15 : null,
+        endDate: new Date(Date.now() + weeksOut * 7 * 24 * 60 * 60 * 1000),
+        isActive: true,
+      },
+    });
+
+    let currentPrice = startingPrice;
+    for (const bidderId of bidders) {
+      currentPrice = Math.round((currentPrice + startingPrice * faker.number.float({ min: 0.05, max: 0.15, fractionDigits: 2 })) * 100) / 100;
+      await prisma.auctionBid.create({ data: { auctionId: auction.id, bidderId, bidAmount: currentPrice } });
+    }
+    if (bidders.length > 0) {
+      await prisma.auction.update({ where: { id: auction.id }, data: { currentPrice } });
+    }
+    auctionsCreated++;
+  }
+
+  // ---------- CHATS COMPRADOR-VENDEDOR ----------
+  function icebreakersFor(city: string): string[] {
+    const match = BOLIVIANISMOS.find((r) => r.aliases.includes(city.toLowerCase()));
+    return (match ?? BOLIVIANISMOS[0]).icebreakers;
+  }
+
+  async function seedConversation(buyerId: number, sellerId: number, productId: number | null, sellerCity: string) {
+    const conversation = await prisma.conversation.create({
+      data: { buyerId, sellerId, productId },
+    });
+    const phrases = icebreakersFor(sellerCity);
+    const exchange: Array<{ senderId: number; content: string }> = [
+      { senderId: buyerId, content: faker.helpers.arrayElement(phrases) },
+      { senderId: sellerId, content: '¡Hola! Sí, está disponible todavía.' },
+      { senderId: buyerId, content: '¿Hace delivery o es solo presencial?' },
+      { senderId: sellerId, content: 'Hago envío a todo el departamento, sin costo extra dentro de la ciudad.' },
+    ];
+    for (let i = 0; i < exchange.length; i++) {
+      await prisma.message.create({
+        data: {
+          conversationId: conversation.id,
+          senderId: exchange[i].senderId,
+          content: exchange[i].content,
+          createdAt: new Date(Date.now() - (exchange.length - i) * 60 * 60 * 1000),
+        },
+      });
+    }
+    return conversation;
+  }
+
+  // Chat fijo entre las cuentas demo, para que sea fácil de verificar al revisar la app.
+  await seedConversation(demoBuyer.id, demoSeller.id, productSellerMap.get(auctionProductIds[0]) === demoSeller.id ? auctionProductIds[0] : null, 'Cochabamba');
+
+  let conversationsCreated = 1;
+  const extraChats = Math.min(5, customers.length, sellers.length);
+  for (let i = 0; i < extraChats; i++) {
+    const buyerId = customers[faker.number.int({ min: 0, max: customers.length - 1 })];
+    const sellerId = sellers[faker.number.int({ min: 0, max: sellers.length - 1 })];
+    if (buyerId === sellerId) continue;
+    const seller = await prisma.user.findUnique({ where: { id: sellerId } });
+    try {
+      await seedConversation(buyerId, sellerId, null, seller?.locationCity ?? 'La Paz');
+      conversationsCreated++;
+    } catch {
+      // conversación duplicada (mismo comprador/vendedor/producto) — se ignora
+    }
+  }
+
   console.log('✅ Seed completado');
-  console.log(`  Usuarios: ${30 + 12 + 1}`);
+  console.log(`  Usuarios: ${customers.length + sellers.length + 1}`);
   console.log(`  Categorías: ${Object.keys(categoryMap).length}`);
   console.log(`  Productos: ${productIds.length}`);
   console.log(`  Sellers: ${sellers.length}`);
   console.log(`  Atributos: ${Object.keys(attrMap).length}`);
   console.log(`  Tags: ${tagIds.length}`);
+  console.log(`  Subastas activas: ${auctionsCreated}`);
+  console.log(`  Chats: ${conversationsCreated}`);
 }
 
 main()

@@ -39,53 +39,24 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: pctienda/backend/package-lock.json
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
-        working-directory: pctienda/backend
+        working-directory: backend
         run: npm ci
 
       - name: Generate Prisma client
-        working-directory: pctienda/backend
+        working-directory: backend
         run: npx prisma generate
 
       - name: Lint
-        working-directory: pctienda/backend
+        working-directory: backend
         run: npm run lint
 
       - name: Typecheck
-        working-directory: pctienda/backend
+        working-directory: backend
         run: npm run typecheck
 
       - name: Test
-        working-directory: pctienda/backend
+        working-directory: backend
         run: npm test
-
-  frontend:
-    name: Frontend — lint + typecheck + build
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: pctienda/frontend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: pctienda/frontend
-        run: npm ci
-
-      - name: Lint
-        working-directory: pctienda/frontend
-        run: npm run lint
-
-      - name: Typecheck
-        working-directory: pctienda/frontend
-        run: npm run typecheck
-
-      - name: Build
-        working-directory: pctienda/frontend
-        run: npm run build

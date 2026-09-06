@@ -4,6 +4,10 @@ Marketplace multi-vendedor con catálogo unificado, comparación de precios entr
 cálculo de envío por ubicación, subastas estilo eBay, chat en tiempo real, sistema de comisiones
 y panel de administración completo.
 
+Esta entrega incluye el **backend** (API + base de datos) y la **app móvil Android**. El
+frontend web se desarrolla en un repositorio aparte y se referencia aquí solo como demo
+desplegada.
+
 ## Demo desplegada
 
 | App | URL |
@@ -11,7 +15,16 @@ y panel de administración completo.
 | Web | https://lacase-frontend.onrender.com |
 | API | https://lacase-backend.onrender.com/api |
 | Base de datos | PostgreSQL administrado en Supabase |
-| App móvil (Android) | [`LaCase.apk`](./LaCase.apk) — ver [instalación](#app-móvil-apk) |
+| App móvil (Android) | [`lacase.apk`](./lacase.apk) — ver [instalación](#app-móvil-apk) |
+
+## Capturas de pantalla
+
+<p>
+  <img src="screenshots/01-home.png" width="230" alt="Catálogo" />
+  <img src="screenshots/02-producto.png" width="230" alt="Detalle de producto" />
+  <img src="screenshots/03-subasta.png" width="230" alt="Subasta" />
+  <img src="screenshots/04-chat.png" width="230" alt="Chat" />
+</p>
 
 ## Stack
 
@@ -23,8 +36,8 @@ y panel de administración completo.
 | App móvil | Expo (React Native) + TypeScript |
 | Tiempo real | Socket.IO (chat, subastas, notificaciones) |
 | Validación | Zod (backend y formularios) |
-| Hosting | Render (API + sitio estático) · Supabase (base de datos) |
-| Calidad | ESLint + Prettier + Jest + Vitest + GitHub Actions CI |
+| Hosting | Render (API y sitio web) · Supabase (base de datos) |
+| Calidad | ESLint + Prettier + Jest + GitHub Actions CI |
 
 ## Funcionalidades principales
 
@@ -44,9 +57,12 @@ y panel de administración completo.
 ### Subastas (estilo eBay)
 - **Proxy bidding** (la oferta es un máximo), **precio de reserva**, **Buy It Now**,
   **anti-sniping** (extiende el tiempo), incremento dinámico por rango, watchlist
+- La base de datos de demo incluye subastas activas con varias semanas de duración,
+  algunas ya con ofertas.
 
 ### Comunicación
 - **Chat comprador↔vendedor** en tiempo real (Socket.IO) con badge de no leídos
+- La cuenta de comprador de prueba ya tiene una conversación iniciada con la de vendedor
 - **Notificaciones por rol** con campana global, historial persistente y navegación directa
 
 ### Administración (10 módulos)
@@ -69,33 +85,28 @@ LaCase/
       utils/       # errores, logger, paginación, envío, JWT
     prisma/        # Schema + seed
     tests/         # tests unitarios, de integración y E2E
-  frontend/
-    src/
-      components/  # UI reutilizable (ProductCard, ImageCrop, ErrorBoundary...)
-      pages/       # páginas públicas, cuenta, vendedor, admin
-      services/    # API client con interceptores, Socket.IO
-      stores/      # Zustand (auth, cart, theme, currency, filters...)
-      hooks/       # useMoney, useAuth...
-      types/       # Tipos de dominio compartidos
   mobile/
-    src/           # App Expo (React Native) — reutiliza los mismos patrones que el frontend
+    src/           # App Expo (React Native)
     android/       # Proyecto nativo Android (para generar el APK)
-  .github/workflows/  # CI (lint + typecheck + test + build)
-  render.yaml         # Blueprint de despliegue en Render
+  screenshots/     # Capturas de pantalla usadas en este README
+  .github/workflows/  # CI (lint + typecheck + test)
+  render.yaml         # Blueprint de despliegue del backend en Render
   docker-compose.yml
-  LaCase.apk          # APK release, listo para instalar
+  lacase.apk          # APK release, listo para instalar
 ```
+
+El frontend web (React + Vite) vive en un repositorio separado, ya que no forma parte de
+esta entrega; consume la misma API y se despliega también en Render.
 
 ## Despliegue en producción
 
 - **Backend**: Render (Web Service) — Node.js + Prisma, conectado a Supabase mediante
   `DATABASE_URL`. Definido en [`render.yaml`](./render.yaml).
-- **Frontend**: Render (Static Site), compilado con `VITE_API_URL`/`VITE_SOCKET_URL` apuntando
-  al backend en Render.
 - **Base de datos**: proyecto PostgreSQL en Supabase, sincronizado con `npx prisma db push` y
   poblado con `prisma/seed.ts`.
 - **App móvil**: el APK release incluido apunta directamente al backend desplegado en Render
   (sin necesidad de levantar nada localmente).
+- **Web**: sitio estático en Render, compilado apuntando al mismo backend.
 
 ## Instalación y ejecución local
 
@@ -116,16 +127,7 @@ npx tsx prisma/seed.ts   # Poblar con datos de prueba
 npm run dev              # API + WebSocket en :3000
 ```
 
-### 3. Frontend
-
-```bash
-cd frontend
-cp .env.example .env
-npm install
-npm run dev              # SPA en :5173
-```
-
-### 4. App móvil
+### 3. App móvil
 
 ```bash
 cd mobile
@@ -133,7 +135,10 @@ npm install
 npm start                # Expo — escaneá el QR con Expo Go, o "a" para emulador Android
 ```
 
-### 5. (Opcional) Docker
+En desarrollo, la app apunta al backend local (`mobile/src/config/env.ts`); ajustá la IP de
+tu PC ahí si probás desde un teléfono físico en la misma red.
+
+### 4. (Opcional) Docker
 
 ```bash
 docker compose up -d
@@ -143,9 +148,12 @@ docker compose up -d
 
 | Rol | Email | Password |
 |---|---|---|
-| Admin | admin@pctienda.com | admin123 |
-| Vendedor | Will.Homenick@hotmail.com | password123 |
-| Cliente | buyer.chat@mail.com | password123 |
+| Vendedor | vendedor@lacase.bo | password123 |
+| Cliente | comprador@lacase.bo | password123 |
+
+Además de estas dos cuentas fijas, el seed genera vendedores y compradores adicionales con
+datos aleatorios (todos con contraseña `password123`) para poblar el catálogo, las subastas
+y los chats de ejemplo.
 
 ## Comandos de calidad
 
@@ -157,26 +165,20 @@ npm test              # Tests unitarios + integración + E2E
 npm run test:coverage # Cobertura
 npm run format        # Prettier
 
-# Frontend (cd frontend)
-npm run lint
-npm run typecheck
-npm run build
-npm test              # Vitest
-
 # Mobile (cd mobile)
 npm test              # Jest
 ```
 
 ## App móvil (APK)
 
-El archivo [`LaCase.apk`](./LaCase.apk), en la raíz del repositorio, es un **build Release**
+El archivo [`lacase.apk`](./lacase.apk), en la raíz del repositorio, es un **build Release**
 firmado, listo para instalar en cualquier dispositivo Android sin pasar por ningún store. Ya
 viene apuntando al backend desplegado en Render, así que funciona de forma independiente,
 sin depender de que el proyecto esté corriendo en una PC local.
 
 Para instalarlo:
 
-1. Descargá `LaCase.apk` al dispositivo Android.
+1. Descargá `lacase.apk` al dispositivo Android.
 2. Habilitá la instalación de "orígenes desconocidos" / "apps de fuentes externas" para el
    instalador que uses (Chrome, Archivos, etc.) cuando el sistema lo pida.
 3. Abrí el APK descargado y confirmá la instalación.

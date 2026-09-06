@@ -27,6 +27,9 @@ mobile/android/app/*.keystore
 mobile/android/app/*.jks
 mobile/ios/build/
 
+# El frontend web se despliega desde un repositorio separado (no se incluye en esta entrega)
+/frontend/
+
 # Carpetas de research/specs privadas (no se suben al repo)
 /documentacion/
 /especificaciones/

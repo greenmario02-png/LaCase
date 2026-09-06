@@ -24,18 +24,5 @@ services:
       - key: CORS_ORIGIN
         sync: false
 
-  - type: web
-    name: lacase-frontend
-    runtime: static
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    envVars:
-      - key: VITE_API_URL
-        sync: false
-      - key: VITE_SOCKET_URL
-        sync: false
+# El sitio estático del frontend (lacase-frontend) se despliega en Render desde un
+# repositorio separado — no forma parte de esta entrega de código.
