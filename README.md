@@ -19,14 +19,17 @@ desplegada.
 
 ## Capturas de pantalla
 
+Tomadas del APK Release corriendo en un dispositivo Android real, conectado al backend en
+producción (Render + Supabase).
+
 | | | |
 |---|---|---|
-| ![Inicio](screenshots/01-home.png) | ![Producto](screenshots/02-producto.png) | ![Subasta](screenshots/03-subasta.png) |
-| **Inicio** — cotizaciones en vivo, categorías y ofertas relámpago | **Detalle de producto** — precio, vendedor y reseñas | **Subasta** — puja, reserva, historial de ofertas |
-| ![Chat](screenshots/04-chat.png) | ![Foro](screenshots/05-foro.png) | ![Perfil](screenshots/06-perfil.png) |
-| **Mensajes** — chat comprador↔vendedor en tiempo real | **Foro** — preguntas y respuestas con contexto boliviano | **Perfil** — accesos según el rol del usuario |
-| ![Catálogo](screenshots/07-productos.png) | | |
-| **Catálogo** — búsqueda y filtros multi-vendedor | | |
+| ![Login](screenshots/01-login.jpeg) | ![Inicio](screenshots/02-home.jpeg) | ![Productos](screenshots/03-productos.jpeg) |
+| **Login** — autenticación JWT con refresh token | **Inicio** — cotizaciones en vivo, categorías y ofertas relámpago | **Catálogo** — búsqueda y filtros multi-vendedor |
+| ![Subastas](screenshots/04-subastas.jpeg) | ![Chat](screenshots/05-chat-detalle.jpeg) | ![Mensajes](screenshots/06-mensajes.jpeg) |
+| **Subastas activas** — puja, precio y cuenta regresiva | **Chat** — conversación comprador↔vendedor en tiempo real | **Mensajes** — lista de conversaciones con badge de no leídos |
+| ![Perfil](screenshots/07-perfil.jpeg) | ![Foro](screenshots/08-foro.jpeg) | |
+| **Perfil** — datos del usuario, monedas y pedidos reales | **Foro** — preguntas y respuestas con contexto boliviano | |
 
 ## Stack
 
